@@ -1,38 +1,55 @@
-// À ajouter dans window.Pripri pour appeler l'IA
-async function askAI(prompt) {
-  if (!Pripri.isConnected) return "Veuillez vous connecter d'abord.";
-  
-  const API_KEY = "TA_CLE_GEMINI_ICI"; // À obtenir sur Google AI Studio
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+// /AI/script.js
 
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
-      })
+// On attend que le module Firebase soit prêt
+const checkPripri = setInterval(() => {
+    if (window.Pripri && window.Pripri.isConnected !== undefined) {
+        clearInterval(checkPripri);
+        initChat();
+    }
+}, 100);
+
+function initChat() {
+    const input = document.querySelector('input');
+    const display = document.querySelector('#chat-display'); // Crée cette div dans ton HTML
+
+    input.addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter' && input.value.trim() !== "") {
+            const prompt = input.value;
+            input.value = "";
+            input.disabled = true; // On bloque l'input pendant que l'IA réfléchit
+
+            // Ajout du message utilisateur à l'écran
+            display.innerHTML += `<div class="user-msg">${prompt}</div>`;
+
+            // Appel à l'IA (en utilisant la fonction qu'on va ajouter à Pripri)
+            const response = await askGemini(prompt);
+
+            // Ajout de la réponse IA
+            display.innerHTML += `<div class="ai-msg">${response}</div>`;
+            
+            input.disabled = false;
+            input.focus();
+        }
     });
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
-  } catch (error) {
-    return "Erreur de connexion avec le cerveau de l'IA.";
-  }
 }
 
-// Mise à jour de l'objet global
-window.Pripri.askAI = askAI;const myInput = document.querySelector('input');
+async function askGemini(text) {
+    // Note : Pour un test rapide sur ton Redmi, mets ta clé ici.
+    // Pour GitHub, on verra plus tard comment la sécuriser.
+    const API_KEY = "TA_CLE_GEMINI"; 
+    const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
-myInput.addEventListener('keypress', async (e) => {
-  if (e.key === 'Enter') {
-    const question = myInput.value;
-    myInput.value = "Réflexion en cours...";
-    
-    // On appelle la fonction de ton module !
-    const reponse = await Pripri.askAI(question);
-    
-    console.log("IA dit :", reponse);
-    // Ici, tu affiches la réponse dans une div
-    myInput.value = ""; 
-  }
-});
+    try {
+        const res = await fetch(URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: text }] }]
+            })
+        });
+        const data = await res.json();
+        return data.candidates[0].content.parts[0].text;
+    } catch (err) {
+        return "❌ Erreur : Impossible de contacter le cerveau de l'IA.";
+    }
+}

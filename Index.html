@@ -1,1 +1,18 @@
 <!doctype html>
+<script>
+  const chatInput = document.querySelector('input');
+  
+  chatInput.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter' && chatInput.value.trim() !== "") {
+      const userText = chatInput.value;
+      chatInput.value = "L'IA réfléchit...";
+      
+      // Appel de la fonction définie dans module.js
+      const aiResponse = await window.Pripri.askAI(userText);
+      
+      console.log("Pripri AI dit :", aiResponse);
+      // Ici, tu peux ajouter le code pour afficher la réponse dans une div
+      chatInput.value = "";
+    }
+  });
+</script>

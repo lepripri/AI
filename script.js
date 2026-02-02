@@ -53,3 +53,14 @@ async function askGemini(text) {
         return "❌ Erreur : Impossible de contacter le cerveau de l'IA.";
     }
 }
+async function getAIResponse(prompt) {
+  const user = Pripri.auth.currentUser;
+  const userDoc = await getDoc(doc(Pripri.db, "users", user.uid));
+  
+  if (userDoc.exists() && userDoc.data().aiKey) {
+    const key = userDoc.data().aiKey;
+    // Appel fetch à Gemini ici avec la clé récupérée...
+  } else {
+    showMessage('clé IA non configurée')
+  }
+}

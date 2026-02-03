@@ -51,9 +51,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- 4. ACTION D'ENVOI ---
     async function envoyer() {
-        const message = inputChat.value.trim();
-        if (!message) return;
+    const message = inputChat.value.trim();
+    if (!message) return;
 
+    // --- VERIFICATION DE CONNEXION ---
+    if (!window.Pripri || !Pripri.auth.currentUser) {
+        // On utilise ta fonction messageAlert que tu as dans allPages/settings
+        if (typeof messageAlert === "function") {
+            messageAlert("Tu dois être connecté pour parler à Gemini !");
+        } else {
+            alert("Connexion requise.");
+        }
+        return; 
+    }
         // Création de l'élément Message Utilisateur
         const userMsg = document.createElement("markdown");
         userMsg.innerHTML = `<content>**Moi :** ${message}</content><display></display>`;
